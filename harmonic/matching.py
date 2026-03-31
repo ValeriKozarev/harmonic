@@ -1,3 +1,5 @@
+### This module contains the logic for translating between keys/Camelot notation as well as ranking songs by harmonic compatibility.
+
 pitch_class_dict = {
     # key is a tuple of key integer and mode (0 for minor, 1 for major)
     (0, 0): "5A",

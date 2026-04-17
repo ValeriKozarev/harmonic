@@ -28,12 +28,16 @@ def recommend(
     console = Console()
     ranked = []
 
-    # TODO: we need to handle empty results for these API searches
-
     if artist:
         with console.status("Initializing..."):
             sp = get_spotify_client()
             tracks = get_all_artist_tracks(sp, artist)
+
+            if not tracks:
+                typer.echo()
+                typer.echo(f"No tracks found for artist: {artist}")
+                raise typer.Exit()
+
         with console.status("Analyzing tracks..."):
             details = get_track_details(tracks)
             ranked = rank_tracks(details, bpm, key)
@@ -42,10 +46,23 @@ def recommend(
         with console.status("Initializing..."):
             sp = get_spotify_client()
             playlists = get_matching_playlists(sp, playlist)
-            print(playlists)
+            if not playlists:
+                typer.echo()
+                typer.echo(f"No playlists found for name: {playlist}")
+                raise typer.Exit()
         
         show_playlist_picker(playlists)
-        selection = int(typer.prompt("Select a playlist (enter number)")) - 1 # adjusting for 0-indexing
+
+        try:
+            selection = int(typer.prompt("Select a playlist (enter number)")) - 1
+        except ValueError:
+            typer.echo("Please enter a valid number.")
+            raise typer.Exit()
+
+        if selection < 0 or selection >= len(playlists):
+            typer.echo("Invalid selection.")
+            raise typer.Exit()
+
         selected_playlist = playlists[selection]
 
         with console.status("Analyzing tracks..."):

@@ -19,16 +19,22 @@ def search_tracks(spotify_client, query):
 
 # this is a helper function to get the reccobeats track ids from the spotify track ids
 def _get_reccobeats_track_ids(spotify_track_ids):
-    url = "https://api.reccobeats.com/v1/track"
-    params = {
-        "ids": ",".join(spotify_track_ids)
-    }
-    headers = {
-        "Accept": "application/json"
-    }
-    response = requests.get(url, params=params, headers=headers)
-    data = response.json()
-    track_dict = {track["href"].split("/")[-1]: track["id"] for track in data["content"]}
+    # batch so we dont make the reccobeats API angry
+    chunks = [spotify_track_ids[i: i + 40] for i in range(0, len(spotify_track_ids), 40)]
+    track_dict = {}
+
+    for chunk in chunks:
+        url = "https://api.reccobeats.com/v1/track"
+        params = {
+            "ids": ",".join(chunk)
+        }
+        headers = {
+            "Accept": "application/json"
+        }
+        response = requests.get(url, params=params, headers=headers)
+        data = response.json()
+        chunk_dict = {track["href"].split("/")[-1]: track["id"] for track in data["content"]}
+        track_dict.update(chunk_dict)
 
     return track_dict
 
@@ -105,7 +111,7 @@ def get_all_artist_tracks(spotify_client, artist_name):
                 "artist_name": track["artists"][0]["name"]
             })
 
-    return tracks[:40] # TODO: add pagination to this flow (ideally downstream since reccobeats API only takes up to 40 tracks at a time)
+    return tracks
 
 # search the current user's playlists and return the list of potential matches
 def get_matching_playlists(spotify_client, playlist_name):
@@ -136,4 +142,4 @@ def get_all_playlist_tracks(spotify_client, playlist_id):
             "artist_name": t["artists"][0]["name"]
         })
     
-    return tracks[:40] # TODO: add pagination to this flow (ideally downstream since reccobeats API only takes up to 40 tracks at a time)
+    return tracks

@@ -53,11 +53,19 @@ def _get_audio_features(spotify_track_ids):
 
 # helper function to make it easier to pull together all the data we've gathered
 def _merge_track_data(tracks, audio_features):
-    # TODO: its possible for a track to be on multiple albums, so we should try to de-dupe by ISRC
+    isrc_set = set()
     merged_data = []
+
     for track in tracks:
         track_id = track["track_id"]
+
         if track_id in audio_features:
+            # avoid adding tracks we've already seen
+            if audio_features[track_id]["isrc"] in isrc_set:
+                continue
+
+            isrc_set.add(audio_features[track_id]["isrc"])
+
             track_to_add = {
                 "track_id": track_id,
                 "name": track["name"],

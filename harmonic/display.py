@@ -20,6 +20,8 @@ def generate_results_table(results, title):
         row_style = tier_styles.get(result_row["tier"], "white")
         table.add_row(result_row["name"], result_row["artist_name"], str(result_row["bpm"]), result_row["camelot_key"], result_row["tier"], style=row_style)
 
+    # TODO: we probably want to cap how many entries the table will show? how helpful is a 50+ line output?
+
     console = Console()
     console.print() # adding a blank line to make things a bit cleaner
     console.print(table)

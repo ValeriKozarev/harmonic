@@ -7,6 +7,8 @@ tier_styles = {
     "Ok": "orange3"
 }
 
+# TODO: add disclaimer that data might be incorrect as we aren't using Spotify for all our data
+
 def generate_results_table(results, title):
     table = Table(title=title) # TODO: might be worth making this a bit more robust based on the query we are answering
 

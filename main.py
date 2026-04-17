@@ -28,6 +28,9 @@ def recommend(
     console = Console()
     ranked = []
 
+    # TODO: gracefully handle other errors like rate limits etc. and propagate those up
+    # TODO: maybe also add some more loading indicators?
+
     if artist:
         with console.status("Initializing..."):
             sp = get_spotify_client()
@@ -71,8 +74,10 @@ def recommend(
             ranked = rank_tracks(details, bpm, key)
 
 
-    title = f"{artist} Recommendations" if artist else f"{playlist} Recommendations"
+    title = "Artist Track Recommendations" if artist else "Playlist Track Recommendations"
     generate_results_table(ranked, title)
+
+    # TODO: it would be cool to show a stat of how many tracks were analyzed
 
 @app.command()
 def dummy_command():

@@ -141,7 +141,7 @@ def get_matching_playlists(spotify_client, playlist_name):
             "track_count": p["items"]["total"]
         }
         for p in all_playlists
-        if playlist_name.lower() in p["name"].lower() # TODO: we could probably be smart on exact matches
+        if playlist_name.lower() in p["name"].lower() # TODO: we could probably be smart on exact matches, or if there is only one match
     ]
 
     return filtered_playlists

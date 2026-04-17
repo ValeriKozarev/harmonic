@@ -16,11 +16,17 @@ When building or performing a DJ set, finding a good transition means finding a 
 ```
 python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
 ```
+Example:
+![results for searching within artist catalog](./screenshots/artist_demo_041726.png)
 
 ### Recommend by Spotify playlist
 ```
 python3 main.py recommend --bpm 123 --key 10B --playlist "moshi"
 ```
+Example:
+![results for searching within playlist](./screenshots/playlist_demo_041726.png)
+
+
 Searches your Spotify library for matching playlists, lets you pick one, then finds compatible tracks within it.
 
 Results are color-coded by compatibility tier:

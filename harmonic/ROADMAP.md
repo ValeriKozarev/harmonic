@@ -16,9 +16,6 @@
 python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
 python3 main.py recommend --bpm 123 --key 10B --playlist "chill hosting"
 ```
-
-![Recommend command output](../screenshots/screenshot_demo_041726.png)
-
 ---
 
 ## In Progress / TODOs

@@ -23,14 +23,12 @@ python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
 - `get_all_artist_tracks` is capped at 40 tracks (`tracks[:40]`) — needs pagination through full artist catalog
 - `artist_albums()` uses `limit=5` — needs a `while` loop on `next` to fetch all albums
 - ReccoBeats ID mapping should process in batches of 40 (chunking logic exists but limit needs confirming)
+- for the playlist flow we will need pagination for the user's playlists and also the tracks within the playlist
 
 ### `recommend` command — remaining flows
 - `--track "Song Name"` input: disambiguate track, auto-fetch BPM and key, then run recommendation flow
 - `--playlist` flag: list user's Spotify playlists, let user pick one, use as candidate pool instead of artist catalog
 - Make `--artist` truly optional once playlist flow is implemented
-
-### Deduplication
-- Same track can appear on multiple albums with different Spotify IDs but same ISRC — deduplicate in `_merge_track_data` by ISRC
 
 ### Display
 - Table title could be more descriptive based on the query (artist name, BPM, key used)

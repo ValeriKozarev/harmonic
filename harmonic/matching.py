@@ -28,8 +28,44 @@ pitch_class_dict = {
     (11, 1): "6B",
 }
 
+# convert key to Camelot notation
 def to_camelot(key, mode):
     if key == -1:
         return "Unknown"
     
     return pitch_class_dict[(key, mode)]
+
+# find the distance between two keys on the Camelot wheel for ranking and comparison
+def calc_camelot_dist(key1, key2):
+    key1_num, key1_mode = int(key1[:-1]), key1[-1]
+    key2_num, key2_mode = int(key2[:-1]), key2[-1]
+
+    diff = abs(key1_num - key2_num) % 12
+
+    # note: naive approach to start, we'll bump the distance by 1 if the mode doesn't match though I think there is more nuance here...
+    mode_diff = 1 if key1_mode != key2_mode else 0
+
+    distance = min(diff, 12 - diff) + mode_diff
+
+    return distance
+
+# given a list of tracks and some criteria (BPM and Camelot key) to match against, return them in ranked order in terms of best match
+def rank_tracks(tracks, target_bpm, target_key):
+    results = []
+
+    for track in tracks:
+        bpm_dist = abs(track["bpm"] - target_bpm)
+        key_dist = calc_camelot_dist(track["camelot_key"], target_key)
+
+        if (bpm_dist <= 5 and key_dist <= 2):
+            tier = "Perfect Match"
+        elif (bpm_dist <= 10 and key_dist <= 3):
+            tier = "Workable"
+        elif (10 < bpm_dist <= 15 and key_dist <= 4):
+            tier = "Ok"
+        else:
+            continue # bad matches don't even get included in the final results array
+
+        results.append({**track, "tier": tier, "score": (key_dist, bpm_dist)}) # slightly giving the edge to key being more important here
+
+    return sorted(results, key=lambda t: t["score"])

@@ -69,9 +69,31 @@ def _merge_track_data(tracks, audio_features):
 
     return merged_data
 
-# full pipeline of fetching and shaping data
+# full pipeline of fetching and shaping data for a list of tracks
 def get_track_details(tracks):
     spotify_track_ids = [track["track_id"] for track in tracks]
     audio_features = _get_audio_features(spotify_track_ids)
 
     return _merge_track_data(tracks, audio_features)
+
+# get all of an artist's tracks from Spotify
+def get_all_artist_tracks(spotify_client, artist_name):
+    # we need to get the artist's ID then get all their albums then collate all the tracks from all the albums
+    artist_results = spotify_client.search(q=artist_name, type="artist")
+    artist_id = artist_results["artists"]["items"][0]["id"]
+
+    artist_albums_results = spotify_client.artist_albums(artist_id, include_groups="single,album", limit=5) # TODO: add pagination
+    album_ids = [album["id"] for album in artist_albums_results["items"]]
+
+    tracks = []
+    for album_id in album_ids:
+        album_tracks = spotify_client.album_tracks(album_id)
+        for track in album_tracks["items"]:
+            tracks.append({
+                "track_id": track["id"],
+                "name": track["name"],
+                "artist_id": track["artists"][0]["id"],
+                "artist_name": track["artists"][0]["name"]
+            })
+
+    return tracks

@@ -21,4 +21,5 @@ def generate_results_table(results, title):
         table.add_row(result_row["name"], result_row["artist_name"], str(result_row["bpm"]), result_row["camelot_key"], result_row["tier"], style=row_style)
 
     console = Console()
+    console.print() # adding a blank line to make things a bit cleaner
     console.print(table)

@@ -1,9 +1,11 @@
-import typer
-import json
 from harmonic.auth import get_spotify_client
 from harmonic.api import get_all_artist_tracks, get_track_details
 from harmonic.matching import rank_tracks
 from harmonic.display import generate_results_table
+from rich.console import Console
+import typer
+import json
+
 
 app = typer.Typer()
 
@@ -14,10 +16,13 @@ def recommend(
     key: str = typer.Option(..., help="Target Camelot Key"),
     artist: str = typer.Option(None, help="Filter by Artist Name") # TODO: we'll want to make artist name optional and add other commands for other workflows later
 ):
-    sp = get_spotify_client()
-    tracks = get_all_artist_tracks(sp, artist)
-    details = get_track_details(tracks)
-    ranked = rank_tracks(details, bpm, key)
+    console = Console()
+    with console.status("Analyzing tracks..."):
+        sp = get_spotify_client()
+        tracks = get_all_artist_tracks(sp, artist)
+        details = get_track_details(tracks)
+        ranked = rank_tracks(details, bpm, key)
+
     generate_results_table(ranked, f"{artist} Track Recommendations")
 
 @app.command()

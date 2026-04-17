@@ -1,0 +1,24 @@
+from rich.console import Console
+from rich.table import Table
+
+tier_styles = {
+    "Perfect Match": "green",
+    "Workable": "yellow",
+    "Ok": "orange3"
+}
+
+def generate_results_table(results, title):
+    table = Table(title=title) # TODO: might be worth making this a bit more robust based on the query we are answering
+
+    table.add_column("Track", justify="center")
+    table.add_column("Artist", justify="center")
+    table.add_column("BPM", justify="center")
+    table.add_column("Camelot", justify="center")
+    table.add_column("Tier", justify="center")
+
+    for result_row in results:
+        row_style = tier_styles.get(result_row["tier"], "white")
+        table.add_row(result_row["name"], result_row["artist_name"], str(result_row["bpm"]), result_row["camelot_key"], result_row["tier"], style=row_style)
+
+    console = Console()
+    console.print(table)

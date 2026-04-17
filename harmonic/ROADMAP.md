@@ -62,6 +62,10 @@ Cache all fetched track data in a local SQLite database so the app builds up a p
 
 Implementation: `sqlite3` from Python stdlib. A new `db.py` module in the package.
 
+## Future: local config file to tailor recommendations
+
+It would be nice for you to be able to tweak the matching criteria for what you'd consider a "perfect match" for example, or if you prioritize BPM or key as the more important thing when comparing, etc.
+
 ---
 
 ## Known Constraints

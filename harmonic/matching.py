@@ -57,6 +57,8 @@ def rank_tracks(tracks, target_bpm, target_key):
         bpm_dist = abs(track["bpm"] - target_bpm)
         key_dist = calc_camelot_dist(track["camelot_key"], target_key)
 
+        # TODO: it would be nice to make this more granular in the future
+
         if (bpm_dist <= 5 and key_dist <= 2):
             tier = "Perfect Match"
         elif (bpm_dist <= 10 and key_dist <= 3):

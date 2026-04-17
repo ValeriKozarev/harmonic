@@ -21,7 +21,7 @@ def get_spotify_client():
         client_id=client_id,
         client_secret=client_secret,
         redirect_uri=redirect_uri,
-        scope="user-library-read",
+        scope="user-library-read playlist-read-private playlist-read-collaborative",
     )
 
     spotify_instance = Spotify(auth_manager=local_auth_manager)

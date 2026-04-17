@@ -106,3 +106,34 @@ def get_all_artist_tracks(spotify_client, artist_name):
             })
 
     return tracks[:40] # TODO: add pagination to this flow (ideally downstream since reccobeats API only takes up to 40 tracks at a time)
+
+# search the current user's playlists and return the list of potential matches
+def get_matching_playlists(spotify_client, playlist_name):
+    playlist_results = spotify_client.current_user_playlists(limit=50) # TODO: add pagination here too, a user can definitely have more than 50 playlists
+    filtered_playlists = [
+        {
+            "id": p["id"],
+            "name": p["name"],
+            "track_count": p["items"]["total"]
+        }
+        for p in playlist_results["items"]
+        if playlist_name.lower() in p["name"].lower() # TODO: we could probably be smart on exact matches
+    ]
+
+    return filtered_playlists
+
+# fetch all the tracks that are in a given playlist
+def get_all_playlist_tracks(spotify_client, playlist_id):
+    playlist_track_results = spotify_client.playlist_tracks(playlist_id, limit=50) # TODO: add pagination here too, a playlist can have more than 50 tracks
+    
+    tracks = []
+    for track in playlist_track_results["items"]:
+        t = track["item"]
+        tracks.append({
+            "track_id": t["id"],
+            "name": t["name"],
+            "artist_id": t["artists"][0]["id"],
+            "artist_name": t["artists"][0]["name"]
+        })
+    
+    return tracks[:40] # TODO: add pagination to this flow (ideally downstream since reccobeats API only takes up to 40 tracks at a time)

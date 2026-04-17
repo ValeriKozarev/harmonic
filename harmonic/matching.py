@@ -68,4 +68,9 @@ def rank_tracks(tracks, target_bpm, target_key):
 
         results.append({**track, "tier": tier, "score": (key_dist, bpm_dist)}) # slightly giving the edge to key being more important here
 
-    return sorted(results, key=lambda t: t["score"])
+    tier_order = {
+        "Perfect Match": 0,
+        "Workable": 1,
+        "Ok": 2
+    }
+    return sorted(results, key=lambda t: (tier_order[t["tier"]], t["score"][0], t["score"][1])) # sort by tier first, then key distance, then bpm distance

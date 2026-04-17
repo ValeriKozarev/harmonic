@@ -25,3 +25,9 @@ def generate_results_table(results, title):
     console = Console()
     console.print() # adding a blank line to make things a bit cleaner
     console.print(table)
+
+def show_playlist_picker(playlists):
+    console = Console()
+
+    for idx, playlist in enumerate(playlists, start=1):
+        console.print(f"{idx}. {playlist['name']} ({playlist['track_count']} tracks)")

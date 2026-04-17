@@ -1,7 +1,7 @@
 from harmonic.auth import get_spotify_client
-from harmonic.api import get_all_artist_tracks, get_track_details
+from harmonic.api import get_all_artist_tracks, get_track_details, get_matching_playlists, get_all_playlist_tracks
 from harmonic.matching import rank_tracks
-from harmonic.display import generate_results_table
+from harmonic.display import generate_results_table, show_playlist_picker
 from rich.console import Console
 import typer
 import json
@@ -14,19 +14,52 @@ app = typer.Typer()
 def recommend(
     bpm: int = typer.Option(..., help="Target BPM"),
     key: str = typer.Option(..., help="Target Camelot Key"),
-    artist: str = typer.Option(None, help="Filter by Artist Name") # TODO: we'll want to make artist name optional and add other commands for other workflows later
+    artist: str = typer.Option(None, help="Filter by Artist Name"),
+    playlist: str = typer.Option(None, help="Filter by Playlist Name")
 ):
-    console = Console()
-    with console.status("Analyzing tracks..."):
-        sp = get_spotify_client()
-        tracks = get_all_artist_tracks(sp, artist)
-        details = get_track_details(tracks)
-        ranked = rank_tracks(details, bpm, key)
+    if not artist and not playlist:
+        typer.echo("Please provide either an artist or a playlist.")
+        raise typer.Exit()
 
-    generate_results_table(ranked, f"{artist} Track Recommendations")
+    if artist and playlist:
+        typer.echo("Please provide only one of artist or playlist, not both.")
+        raise typer.Exit()
+    
+    console = Console()
+    ranked = []
+
+    # TODO: we need to handle empty results for these API searches
+
+    if artist:
+        with console.status("Initializing..."):
+            sp = get_spotify_client()
+            tracks = get_all_artist_tracks(sp, artist)
+        with console.status("Analyzing tracks..."):
+            details = get_track_details(tracks)
+            ranked = rank_tracks(details, bpm, key)
+    
+    elif playlist:
+        with console.status("Initializing..."):
+            sp = get_spotify_client()
+            playlists = get_matching_playlists(sp, playlist)
+            print(playlists)
+        
+        show_playlist_picker(playlists)
+        selection = int(typer.prompt("Select a playlist (enter number)")) - 1 # adjusting for 0-indexing
+        selected_playlist = playlists[selection]
+
+        with console.status("Analyzing tracks..."):
+            tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
+            details = get_track_details(tracks)
+            ranked = rank_tracks(details, bpm, key)
+
+
+    title = f"{artist} Recommendations" if artist else f"{playlist} Recommendations"
+    generate_results_table(ranked, title)
 
 @app.command()
-def analyze():
+def dummy_command():
+    # TODO: future expansion goes here
     pass
 
 if __name__ == "__main__":

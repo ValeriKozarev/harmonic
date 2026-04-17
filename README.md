@@ -12,22 +12,31 @@ When building or performing a DJ set, finding a good transition means finding a 
 
 ## Usage
 
+### Recommend by artist catalog
 ```
-$ python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
+python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
 ```
 
-Returns a color-coded table of compatible tracks ranked by harmonic proximity:
+### Recommend by Spotify playlist
+```
+python3 main.py recommend --bpm 123 --key 10B --playlist "moshi"
+```
+Searches your Spotify library for matching playlists, lets you pick one, then finds compatible tracks within it.
+
+Results are color-coded by compatibility tier:
 - **Green** — Perfect Match (±5 BPM, ±2 Camelot)
 - **Yellow** — Workable (±10 BPM, ±3 Camelot)
 - **Orange** — Ok (±15 BPM, ±4 Camelot)
+
+Results are sorted by tier first, then by proximity to your target values within each tier.
 
 ---
 
 ## How It Works
 
-1. **Spotify** — searches the artist's catalog and retrieves track metadata
-2. **ReccoBeats** — fetches BPM, key, and audio features for each track
-3. **Camelot wheel logic** — calculates harmonic compatibility using circular distance
+1. **Spotify** — searches the artist's catalog or your playlists and retrieves track metadata
+2. **ReccoBeats** — fetches BPM, key, and audio features for each track (batched in chunks of 40)
+3. **Camelot wheel logic** — calculates harmonic compatibility using circular distance on a 12-point wheel
 4. **Rich** — displays results as a formatted, color-coded terminal table
 
 > Note: Spotify deprecated their audio features endpoint for new apps in November 2024. ReccoBeats is used as a free alternative with comparable accuracy.
@@ -76,6 +85,5 @@ On first run, a browser window will open for Spotify OAuth. After that, the toke
 
 ## Known Limitations
 
-- Artist catalog is currently capped at 40 tracks (pagination coming)
-- No-artist / no-playlist broad discovery not supported — a candidate pool is required
-- ReccoBeats is a free, unattributed service with no SLA — data is cached locally in a future release
+- No broad discovery — an artist name or playlist is required as a candidate pool
+- ReccoBeats is a free, unattributed service with no SLA — local caching coming in a future release

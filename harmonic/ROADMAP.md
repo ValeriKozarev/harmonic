@@ -2,15 +2,19 @@
 
 ## Completed
 
-- `auth.py` — Spotify OAuth with token caching
-- `api.py` — full data pipeline: Spotify search → ReccoBeats ID mapping → audio features fetch → track data merging
-- `matching.py` — Camelot lookup table, `to_camelot()` conversion, circular Camelot distance, `rank_tracks()` with tiered scoring
-- `display.py` — color-coded rich terminal table (green/yellow/orange by tier)
-- `main.py` — working `recommend` command with loading spinner
+- `auth.py` — Spotify OAuth with token caching, `playlist-read-private` scope
+- `api.py` — full data pipeline: Spotify search → ReccoBeats ID mapping (batched in chunks of 40) → audio features fetch → track data merging with ISRC deduplication
+- `api.py` — artist catalog fetch with full pagination (albums + tracks)
+- `api.py` — playlist search with full pagination across user's full library
+- `api.py` — playlist track fetch with full pagination
+- `matching.py` — Camelot lookup table, `to_camelot()` conversion, circular Camelot distance, `rank_tracks()` with tiered scoring sorted by tier then proximity
+- `display.py` — color-coded rich terminal table (green/yellow/orange by tier), empty results handling
+- `main.py` — `recommend` command with both `--artist` and `--playlist` flows, loading spinner, input validation, empty results guards, selection validation with try/except
 
-**Working command:**
+**Working commands:**
 ```
 python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
+python3 main.py recommend --bpm 123 --key 10B --playlist "moshi"
 ```
 
 ![Recommend command output](../screenshots/screenshot_demo_041726.png)
@@ -19,19 +23,18 @@ python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
 
 ## In Progress / TODOs
 
-### Pagination
-- `get_all_artist_tracks` is capped at 40 tracks (`tracks[:40]`) — needs pagination through full artist catalog
-- `artist_albums()` uses `limit=5` — needs a `while` loop on `next` to fetch all albums
-- ReccoBeats ID mapping should process in batches of 40 (chunking logic exists but limit needs confirming)
-- for the playlist flow we will need pagination for the user's playlists and also the tracks within the playlist
-
 ### `recommend` command — remaining flows
-- `--track "Song Name"` input: disambiguate track, auto-fetch BPM and key, then run recommendation flow
-- `--playlist` flag: list user's Spotify playlists, let user pick one, use as candidate pool instead of artist catalog
-- Make `--artist` truly optional once playlist flow is implemented
+- disambiguating between artists with common names
+- `--track "Song Name"` input: disambiguate track, auto-fetch BPM and key, then run recommendation flow (works with both `--artist` and `--playlist`)
 
 ### Display
-- Table title could be more descriptive based on the query (artist name, BPM, key used)
+- Table title could be more descriptive — include BPM and key used in the query
+- Consider capping table output (50+ rows is unwieldy)
+- Listing how many tracks got analyzed could be cool
+- More graceful error handling
+
+### Robustness
+- Playlist search could be smarter about exact vs. partial matches and auto-selecting in these cases
 
 ---
 

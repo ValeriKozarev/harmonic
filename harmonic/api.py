@@ -93,17 +93,29 @@ def get_track_details(tracks):
 
 # get all of an artist's tracks from Spotify
 def get_all_artist_tracks(spotify_client, artist_name):
+    # TODO: do we need to make this more robust for artist naming?
+
     # due to how the Spotify APIs are structured, we need to first get the Artist ID, then the list of Album IDs, and then the track IDs for each album
     artist_results = spotify_client.search(q=artist_name, type="artist")
     artist_id = artist_results["artists"]["items"][0]["id"]
 
-    artist_albums_results = spotify_client.artist_albums(artist_id, include_groups="single,album", limit=5) # TODO: add pagination, this only does 5 albums at a time
+    artist_albums_results = spotify_client.artist_albums(artist_id, include_groups="single,album", limit=5)
     album_ids = [album["id"] for album in artist_albums_results["items"]]
+
+    while artist_albums_results["next"]:
+        artist_albums_results = spotify_client.next(artist_albums_results)
+        album_ids.extend([album["id"] for album in artist_albums_results["items"]])
 
     tracks = []
     for album_id in album_ids:
         album_tracks = spotify_client.album_tracks(album_id)
-        for track in album_tracks["items"]:
+        tracks_page = album_tracks["items"]
+
+        while album_tracks["next"]:
+            album_tracks = spotify_client.next(album_tracks)
+            tracks_page.extend(album_tracks["items"])
+
+        for track in tracks_page:
             tracks.append({
                 "track_id": track["id"],
                 "name": track["name"],
@@ -115,14 +127,20 @@ def get_all_artist_tracks(spotify_client, artist_name):
 
 # search the current user's playlists and return the list of potential matches
 def get_matching_playlists(spotify_client, playlist_name):
-    playlist_results = spotify_client.current_user_playlists(limit=50) # TODO: add pagination here too, a user can definitely have more than 50 playlists
+    playlist_results = spotify_client.current_user_playlists(limit=50)
+    all_playlists = playlist_results["items"]
+    
+    while playlist_results["next"]:
+        playlist_results = spotify_client.next(playlist_results)
+        all_playlists.extend(playlist_results["items"])
+
     filtered_playlists = [
         {
             "id": p["id"],
             "name": p["name"],
             "track_count": p["items"]["total"]
         }
-        for p in playlist_results["items"]
+        for p in all_playlists
         if playlist_name.lower() in p["name"].lower() # TODO: we could probably be smart on exact matches
     ]
 
@@ -130,10 +148,15 @@ def get_matching_playlists(spotify_client, playlist_name):
 
 # fetch all the tracks that are in a given playlist
 def get_all_playlist_tracks(spotify_client, playlist_id):
-    playlist_track_results = spotify_client.playlist_tracks(playlist_id, limit=50) # TODO: add pagination here too, a playlist can have more than 50 tracks
+    results = spotify_client.playlist_tracks(playlist_id, limit=50)
+    items = results["items"]
+
+    while results["next"]:
+        results = spotify_client.next(results)
+        items.extend(results["items"])
     
     tracks = []
-    for track in playlist_track_results["items"]:
+    for track in items:
         t = track["item"]
         tracks.append({
             "track_id": t["id"],

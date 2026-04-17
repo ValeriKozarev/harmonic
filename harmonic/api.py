@@ -53,6 +53,7 @@ def _get_audio_features(spotify_track_ids):
 
 # helper function to make it easier to pull together all the data we've gathered
 def _merge_track_data(tracks, audio_features):
+    # TODO: its possible for a track to be on multiple albums, so we should try to de-dupe by ISRC
     merged_data = []
     for track in tracks:
         track_id = track["track_id"]
@@ -78,11 +79,11 @@ def get_track_details(tracks):
 
 # get all of an artist's tracks from Spotify
 def get_all_artist_tracks(spotify_client, artist_name):
-    # we need to get the artist's ID then get all their albums then collate all the tracks from all the albums
+    # due to how the Spotify APIs are structured, we need to first get the Artist ID, then the list of Album IDs, and then the track IDs for each album
     artist_results = spotify_client.search(q=artist_name, type="artist")
     artist_id = artist_results["artists"]["items"][0]["id"]
 
-    artist_albums_results = spotify_client.artist_albums(artist_id, include_groups="single,album", limit=5) # TODO: add pagination
+    artist_albums_results = spotify_client.artist_albums(artist_id, include_groups="single,album", limit=5) # TODO: add pagination, this only does 5 albums at a time
     album_ids = [album["id"] for album in artist_albums_results["items"]]
 
     tracks = []
@@ -96,4 +97,4 @@ def get_all_artist_tracks(spotify_client, artist_name):
                 "artist_name": track["artists"][0]["name"]
             })
 
-    return tracks
+    return tracks[:40] # TODO: add pagination to this flow (ideally downstream since reccobeats API only takes up to 40 tracks at a time)

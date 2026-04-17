@@ -1,6 +1,6 @@
 # harmonic
 
-A CLI tool for DJs to find compatible tracks using the Spotify API. Given a song, harmonic helps you find what to play next — searching an artist's catalog for tracks that match by key, BPM, and energy.
+A CLI tool for DJs to find compatible tracks using the Spotify API. Given a BPM and Camelot key (or a source track), harmonic searches an artist's catalog or your Spotify playlists and returns ranked recommendations for your next mix.
 
 ---
 
@@ -10,76 +10,55 @@ When building or performing a DJ set, finding a good transition means finding a 
 
 ---
 
-## Planned Features
-
-### Song Lookup
-Look up any track's musical characteristics, displayed in DJ-friendly format (Camelot key notation, not raw music theory).
+## Usage
 
 ```
-$ harmonic lookup "One More Time" --artist "Daft Punk"
-
-  One More Time — Daft Punk
-  BPM:     123
-  Key:     8B (C major)
-  Energy:  0.84
-  Vibe:    Dance / High energy
+$ python3 main.py recommend --bpm 123 --key 10B --artist "Disclosure"
 ```
 
-### Artist Catalog Match
-Given a song, search an artist's full catalog and return ranked results by compatibility — harmonic key relationships first, then BPM proximity, then energy similarity.
-
-```
-$ harmonic match "One More Time" --artist "Disclosure"
-
-  Compatible tracks from Disclosure's catalog:
-
-  PERFECT MATCH
-  ┌─────────────────────────────┬──────┬──────┬────────┐
-  │ Track                       │ BPM  │ Key  │ Energy │
-  ├─────────────────────────────┼──────┼──────┼────────┤
-  │ Latch                       │ 121  │ 8A   │ 0.79   │
-  │ White Noise                 │ 124  │ 9B   │ 0.88   │
-  └─────────────────────────────┴──────┴──────┴────────┘
-
-  WORKABLE
-  │ You & Me                    │ 120  │ 7B   │ 0.71   │
-```
-
-### Catalog Browse
-Browse any artist's catalog with explicit filters — useful when you already know what you're looking for.
-
-```
-$ harmonic browse "Bicep" --bpm 125-132 --key 4A
-```
+Returns a color-coded table of compatible tracks ranked by harmonic proximity:
+- **Green** — Perfect Match (±5 BPM, ±2 Camelot)
+- **Yellow** — Workable (±10 BPM, ±3 Camelot)
+- **Orange** — Ok (±15 BPM, ±4 Camelot)
 
 ---
 
-## Compatibility Logic
+## How It Works
 
-Compatibility is based on the **Camelot Wheel** — the DJ standard for harmonic mixing. A track is considered:
+1. **Spotify** — searches the artist's catalog and retrieves track metadata
+2. **ReccoBeats** — fetches BPM, key, and audio features for each track
+3. **Camelot wheel logic** — calculates harmonic compatibility using circular distance
+4. **Rich** — displays results as a formatted, color-coded terminal table
 
-- **Perfect match** — same Camelot key, BPM within ±3%
-- **Harmonic match** — adjacent key on the wheel (±1), or relative major/minor swap (8A ↔ 8B), BPM within ±5%
-- **Workable** — compatible key, BPM close enough to beatmatch
-
-BPM compatibility also accounts for half/double time (e.g. 75 BPM can work over 150 BPM).
+> Note: Spotify deprecated their audio features endpoint for new apps in November 2024. ReccoBeats is used as a free alternative with comparable accuracy.
 
 ---
 
-## What Spotify Gives Us
+## Setup
 
-The Spotify audio features endpoint returns everything we need:
+### 1. Clone and create a virtual environment
 
-| Field | Description |
-|---|---|
-| `tempo` | BPM |
-| `key` | Integer 0–11 (C through B) |
-| `mode` | 0 = minor, 1 = major |
-| `energy` | 0.0–1.0, intensity/loudness feel |
-| `danceability` | 0.0–1.0 |
-| `valence` | 0.0–1.0, musical "positivity" |
+```bash
+git clone https://github.com/yourusername/harmonic.git
+cd harmonic
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-`key` + `mode` together map to Camelot notation, which is where the compatibility logic lives.
+### 2. Spotify API credentials
+
+Create an app at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) with redirect URI `http://127.0.0.1:8888/callback`.
+
+### 3. Configure `.env`
+
+```
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
+```
+
+On first run, a browser window will open for Spotify OAuth. After that, the token is cached and login is silent.
 
 ---
 
@@ -88,21 +67,15 @@ The Spotify audio features endpoint returns everything we need:
 | Library | Purpose |
 |---|---|
 | `spotipy` | Spotify API wrapper, handles OAuth |
+| `requests` | HTTP calls to ReccoBeats API |
 | `typer` | CLI interface |
 | `rich` | Terminal tables and formatted output |
-| `python-dotenv` | Spotify API credentials management |
+| `python-dotenv` | Credentials management |
 
 ---
 
-## Potential Future Features
+## Known Limitations
 
-- Match against your own Spotify playlists (not just an artist's catalog)
-- Export a shortlist directly to a new Spotify playlist
-- Transition path finder — given song A and song B, find a middle track that bridges them
-- Energy arc planning for a full set
-
----
-
-## Setup (TBD)
-
-Spotify API credentials will be required. Setup instructions to be added once the initial implementation is complete.
+- Artist catalog is currently capped at 40 tracks (pagination coming)
+- No-artist / no-playlist broad discovery not supported — a candidate pool is required
+- ReccoBeats is a free, unattributed service with no SLA — data is cached locally in a future release

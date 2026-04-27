@@ -33,6 +33,17 @@ python3 main.py recommend --bpm 123 --key 10B --playlist "chill hosting"
 ### Robustness
 - Playlist search could be smarter about exact vs. partial matches and auto-selecting in these cases
 
+### Export command
+Add a `harmonic export --playlist "name"` command that fetches all tracks from a playlist with their BPM and Camelot key and writes them to a local `.txt` file. Useful for workshopping set order in Notion or other note-taking tools before refining in Spotify.
+
+```
+harmonic export --playlist "moshi moshi"
+# writes moshi_moshi.txt with track, artist, BPM, key columns
+```
+
+**Investigate: missing tracks in export**
+Observed ~30 tracks dropped from a 126-track playlist. Two likely causes to confirm: (1) ReccoBeats doesn't have full Spotify catalog coverage — tracks missing from ReccoBeats are silently dropped in `_merge_track_data`; (2) ISRC deduplication (designed for `recommend`) may be incorrectly filtering tracks in the export flow. Tracks without ReccoBeats data should still appear in the export with BPM/key marked as unknown.
+
 ---
 
 ## Future: set command

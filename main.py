@@ -1,11 +1,9 @@
 from harmonic.auth import get_spotify_client
 from harmonic.api import get_all_artist_tracks, get_track_details, get_matching_playlists, get_all_playlist_tracks
 from harmonic.matching import rank_tracks
-from harmonic.display import generate_results_table, show_playlist_picker
+from harmonic.display import generate_results_table, show_playlist_picker, write_setlist_to_file
 from rich.console import Console
 import typer
-import json
-
 
 app = typer.Typer()
 
@@ -80,9 +78,42 @@ def recommend(
     # TODO: it would be cool to show a stat of how many tracks were analyzed
 
 @app.command()
-def dummy_command():
-    # TODO: future expansion goes here
-    pass
+def export(playlist: str = typer.Option(None, help="Export setlist from a specific playlist")):
+    if not playlist:
+        typer.echo("Please provide a playlist.")
+        raise typer.Exit()
+    
+    console = Console()
+    
+    with console.status("Initializing..."):
+        sp = get_spotify_client()
+        playlists = get_matching_playlists(sp, playlist)
+        if not playlists:
+            typer.echo()
+            typer.echo(f"No playlists found for name: {playlist}")
+            raise typer.Exit()
+    
+    show_playlist_picker(playlists)
+
+    try:
+        selection = int(typer.prompt("Select a playlist (enter number)")) - 1
+    except ValueError:
+        typer.echo("Please enter a valid number.")
+        raise typer.Exit()
+
+    if selection < 0 or selection >= len(playlists):
+        typer.echo("Invalid selection.")
+        raise typer.Exit()
+
+    selected_playlist = playlists[selection]
+
+    with console.status("Exporting setlist..."):
+        tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
+        details = get_track_details(tracks)
+        filename = write_setlist_to_file(details, selected_playlist['name'])
+        typer.echo()
+        typer.echo(f"Setlist exported to {filename}")
+    
 
 if __name__ == "__main__":
     app()

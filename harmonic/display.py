@@ -39,3 +39,18 @@ def show_playlist_picker(playlists):
 
     for idx, playlist in enumerate(playlists, start=1):
         console.print(f"{idx}. {playlist['name']} ({playlist['track_count']} tracks)")
+
+def write_setlist_to_file(tracks, playlist_name):
+    filename = playlist_name.strip().lower().replace(" ", "_") + "_setlist.txt"
+    # TODO: look into tracks getting dropped in the merge_tracks_data function
+    with open(filename, 'w') as f:
+        f.write(f"{playlist_name}\n\n")
+        f.write(f"{'Track':<40} {'Artist':<25} {'BPM':<6} {'Key'}\n")
+        f.write("-" * 80 + "\n")
+        for track in tracks:
+            f.write(f"{_truncate(track['name'], 40):<40} {_truncate(track['artist_name'], 25):<25} {track['bpm']:<6} {track['camelot_key']}\n")
+
+    return filename
+
+def _truncate(text, width):
+    return text if len(text) <= width else text[:width-3] + "..."

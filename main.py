@@ -1,7 +1,7 @@
 from harmonic.auth import get_spotify_client
 from harmonic.api import get_all_artist_tracks, get_track_details, get_matching_playlists, get_all_playlist_tracks
 from harmonic.matching import rank_tracks
-from harmonic.display import generate_results_table, show_playlist_picker, write_setlist_to_file
+from harmonic.display import generate_results_table, show_option_picker, write_setlist_to_file
 from rich.console import Console
 import typer
 
@@ -51,17 +51,8 @@ def recommend(
                 typer.echo(f"No playlists found for name: {playlist}")
                 raise typer.Exit()
         
-        show_playlist_picker(playlists)
-
-        try:
-            selection = int(typer.prompt("Select a playlist (enter number)")) - 1
-        except ValueError:
-            typer.echo("Please enter a valid number.")
-            raise typer.Exit()
-
-        if selection < 0 or selection >= len(playlists):
-            typer.echo("Invalid selection.")
-            raise typer.Exit()
+        options = [p['name'] for p in playlists]
+        selection = show_option_picker(options)
 
         selected_playlist = playlists[selection]
         typer.echo()
@@ -93,17 +84,8 @@ def export(playlist: str = typer.Option(None, help="Export setlist from a specif
             typer.echo(f"No playlists found for name: {playlist}")
             raise typer.Exit()
     
-    show_playlist_picker(playlists)
-
-    try:
-        selection = int(typer.prompt("Select a playlist (enter number)")) - 1
-    except ValueError:
-        typer.echo("Please enter a valid number.")
-        raise typer.Exit()
-
-    if selection < 0 or selection >= len(playlists):
-        typer.echo("Invalid selection.")
-        raise typer.Exit()
+    options = [p['name'] for p in playlists]
+    selection = show_option_picker(options)
 
     selected_playlist = playlists[selection]
     typer.echo()

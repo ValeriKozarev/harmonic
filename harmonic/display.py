@@ -1,5 +1,6 @@
 from rich.console import Console
 from rich.table import Table
+import typer
 
 ### This module handles all the display logic for the CLI, including results table, playlist selection, and more.
 
@@ -36,13 +37,34 @@ def generate_results_table(results, title):
     console.print() # adding a blank line to make things a bit cleaner
     console.print(table)
 
-# display a numbered list of playlists for the user to select from
-# TODO: add something like this for tracks and artists as those flows get built out
-def show_playlist_picker(playlists):
+# display a numbered list of options for the user to select from to disambiguate (e.g. playlists, artists, etc.)
+def show_option_picker(options):
     console = Console()
 
-    for idx, playlist in enumerate(playlists, start=1):
-        console.print(f"{idx}. {playlist['name']} ({playlist['track_count']} tracks)")
+    # if there is only one option, just select it and move on instead of asking the user to confirm
+    if len(options) == 1:
+        console.print()
+        console.print(f"Only one option found, selecting \"{options[0]}\" automatically.")
+        return 0
+
+    # otherwise we want to ask them to confirm which one they meant
+    for idx, option in enumerate(options, start=1):
+        console.print(f"{idx}. {option}")
+    
+    try:
+        selection = int(typer.prompt("Select an option (enter number)")) - 1
+    except ValueError:
+        typer.echo("Please enter a valid number.")
+        raise typer.Exit()
+
+    if selection < 0 or selection >= len(options):
+        typer.echo("Invalid selection.")
+        raise typer.Exit()
+    
+    # TODO: add option to try again if no match
+
+    return selection
+
 
 # exports the setlist and associated track metadata to a text file in the current directory
 def write_setlist_to_file(tracks, playlist_name):

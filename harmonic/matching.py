@@ -54,6 +54,9 @@ def rank_tracks(tracks, target_bpm, target_key):
     results = []
 
     for track in tracks:
+        if track["bpm"] == -1 or track["camelot_key"] == "X":
+            continue # skip tracks that are missing data since we can't reliably rank them, maybe report these separately in the future?
+        
         bpm_dist = abs(track["bpm"] - target_bpm)
         key_dist = calc_camelot_dist(track["camelot_key"], target_key)
 

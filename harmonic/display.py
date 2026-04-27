@@ -74,7 +74,12 @@ def write_setlist_to_file(tracks, playlist_name):
         f.write(f"{'Track':<40} {'Artist':<25} {'BPM':<6} {'Key'}\n")
         f.write("-" * 80 + "\n")
         for track in tracks:
-            f.write(f"{_truncate(track['name'], 40):<40} {_truncate(track['artist_name'], 25):<25} {track['bpm']:<6} {track['camelot_key']}\n")
+            bpm = track['bpm'] if track['bpm'] != -1 else '???'
+            camelot_key = track['camelot_key'] if track['camelot_key'] != 'X' else '???'
+            f.write(f"{_truncate(track['name'], 40):<40}")
+            f.write(f"{_truncate(track['artist_name'], 25):<25}") 
+            f.write(f"{bpm:<6}")
+            f.write(f"{camelot_key}\n")
 
     return filename
 

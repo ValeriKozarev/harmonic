@@ -62,8 +62,6 @@ def _merge_track_data(tracks, audio_features):
     isrc_set = set()
     merged_data = []
 
-    # TODO: we need to handle tracks silently failing and disappearing here
-
     for track in tracks:
         track_id = track["track_id"]
 
@@ -81,6 +79,17 @@ def _merge_track_data(tracks, audio_features):
                 "camelot_key": to_camelot(audio_features[track_id]["key"], audio_features[track_id]["mode"]),
                 "bpm": round(audio_features[track_id]["tempo"]),
                 "audio_features": audio_features[track_id],
+            }
+            merged_data.append(track_to_add)
+        else:
+            # don't lose tracks that we couldn't pull data for, mark them for later filtering and reporting
+            track_to_add = {
+                "track_id": track_id,
+                "name": track["name"],
+                "artist_name": track["artist_name"],
+                "camelot_key": "X",
+                "bpm": -1,
+                "audio_features": {}
             }
             merged_data.append(track_to_add)
 

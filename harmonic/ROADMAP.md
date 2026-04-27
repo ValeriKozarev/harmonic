@@ -10,7 +10,9 @@
 - `matching.py` — Camelot lookup table, `to_camelot()` conversion, circular Camelot distance, `rank_tracks()` with tiered scoring sorted by tier then proximity
 - `display.py` — color-coded rich terminal table (green/yellow/orange by tier), empty results handling
 - `main.py` — `recommend` command with both `--artist` and `--playlist` flows, loading spinner, input validation, empty results guards, selection validation with try/except
-- export function for generating a nicely formatted txt file of a specified playlist
+- `main.py` — disclaimer printed before every command via `@app.callback()`
+- `display.py` — `show_option_picker` refactored as a generic disambiguation picker (playlists, artists, tracks); auto-selects and notifies user when only one result is found
+- `main.py` — `export` command for generating a formatted `.txt` file of a playlist with BPM and Camelot key columns
 
 **Working commands:**
 ```
@@ -33,7 +35,7 @@ python3 main.py export --playlist "chill hosting"
 - More graceful error handling
 
 ### Robustness
-- Playlist search could be smarter about exact vs. partial matches and auto-selecting in these cases
+- Playlist search could be smarter about exact vs. partial matches — auto-select when there's an exact name match even if multiple results are returned
 
 **Investigate: missing tracks in export**
 Observed ~30 tracks dropped from a 126-track playlist. Two likely causes to confirm: (1) ReccoBeats doesn't have full Spotify catalog coverage — tracks missing from ReccoBeats are silently dropped in `_merge_track_data`; (2) ISRC deduplication (designed for `recommend`) may be incorrectly filtering tracks in the export flow. Tracks without ReccoBeats data should still appear in the export with BPM/key marked as unknown.

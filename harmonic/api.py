@@ -62,6 +62,8 @@ def _merge_track_data(tracks, audio_features):
     isrc_set = set()
     merged_data = []
 
+    # TODO: we need to handle tracks silently failing and disappearing here
+
     for track in tracks:
         track_id = track["track_id"]
 

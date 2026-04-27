@@ -57,7 +57,7 @@ def rank_tracks(tracks, target_bpm, target_key):
         bpm_dist = abs(track["bpm"] - target_bpm)
         key_dist = calc_camelot_dist(track["camelot_key"], target_key)
 
-        # TODO: it would be nice to make this more granular in the future
+        # TODO: it would be nice to make this more granular/configurable in the future
 
         if (bpm_dist <= 5 and key_dist <= 2):
             tier = "Perfect Match"
@@ -75,4 +75,6 @@ def rank_tracks(tracks, target_bpm, target_key):
         "Workable": 1,
         "Ok": 2
     }
-    return sorted(results, key=lambda t: (tier_order[t["tier"]], t["score"][0], t["score"][1])) # sort by tier first, then key distance, then bpm distance
+
+    # sort by tier first, then key distance, then bpm distance
+    return sorted(results, key=lambda t: (tier_order[t["tier"]], t["score"][0], t["score"][1])) 

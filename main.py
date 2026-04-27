@@ -27,7 +27,6 @@ def recommend(
     ranked = []
 
     # TODO: gracefully handle other errors like rate limits etc. and propagate those up
-    # TODO: maybe also add some more loading indicators?
 
     if artist:
         with console.status("Initializing..."):
@@ -65,6 +64,7 @@ def recommend(
             raise typer.Exit()
 
         selected_playlist = playlists[selection]
+        typer.echo()
 
         with console.status("Analyzing tracks..."):
             tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
@@ -106,6 +106,7 @@ def export(playlist: str = typer.Option(None, help="Export setlist from a specif
         raise typer.Exit()
 
     selected_playlist = playlists[selection]
+    typer.echo()
 
     with console.status("Exporting setlist..."):
         tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
@@ -113,7 +114,11 @@ def export(playlist: str = typer.Option(None, help="Export setlist from a specif
         filename = write_setlist_to_file(details, selected_playlist['name'])
         typer.echo()
         typer.echo(f"Setlist exported to {filename}")
-    
+
+@app.callback()
+def disclaimer():
+    typer.echo("Disclaimer: The recommendations provided by this tool are based on data from Spotify and other 3rd party APIs, and may not always be accurate. Consider double-checking any information received from this tool, and have fun!")
+    typer.echo()
 
 if __name__ == "__main__":
     app()

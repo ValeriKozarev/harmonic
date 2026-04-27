@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 ### This module handles authentication with the Spotify API using the spotipy library.
 
+# loads up the spotify client that we'll use for our API calls
 def get_spotify_client():
     # load environment variables from .env file
     load_dotenv()

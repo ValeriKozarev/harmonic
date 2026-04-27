@@ -1,14 +1,16 @@
 from rich.console import Console
 from rich.table import Table
 
+### This module handles all the display logic for the CLI, including results table, playlist selection, and more.
+
+# TODO: add more configurability in the future
 tier_styles = {
     "Perfect Match": "green",
     "Workable": "yellow",
     "Ok": "orange3"
 }
 
-# TODO: add disclaimer that data might be incorrect as we aren't using Spotify for all our data
-
+# generate a nicely formatted Rich table for the provided result set
 def generate_results_table(results, title):
     table = Table(title=title) # TODO: might be worth making this a bit more robust based on the query we are answering
 
@@ -34,15 +36,17 @@ def generate_results_table(results, title):
     console.print() # adding a blank line to make things a bit cleaner
     console.print(table)
 
+# display a numbered list of playlists for the user to select from
+# TODO: add something like this for tracks and artists as those flows get built out
 def show_playlist_picker(playlists):
     console = Console()
 
     for idx, playlist in enumerate(playlists, start=1):
         console.print(f"{idx}. {playlist['name']} ({playlist['track_count']} tracks)")
 
+# exports the setlist and associated track metadata to a text file in the current directory
 def write_setlist_to_file(tracks, playlist_name):
     filename = playlist_name.strip().lower().replace(" ", "_") + "_setlist.txt"
-    # TODO: look into tracks getting dropped in the merge_tracks_data function
     with open(filename, 'w') as f:
         f.write(f"{playlist_name}\n\n")
         f.write(f"{'Track':<40} {'Artist':<25} {'BPM':<6} {'Key'}\n")
@@ -52,5 +56,6 @@ def write_setlist_to_file(tracks, playlist_name):
 
     return filename
 
+# helper for writing to text file, just shortens long strings
 def _truncate(text, width):
     return text if len(text) <= width else text[:width-3] + "..."

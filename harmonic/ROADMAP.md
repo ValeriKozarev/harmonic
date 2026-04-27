@@ -13,6 +13,7 @@
 - `main.py` — disclaimer printed before every command via `@app.callback()`
 - `display.py` — `show_option_picker` refactored as a generic disambiguation picker (playlists, artists, tracks); auto-selects and notifies user when only one result is found
 - `main.py` — `export` command for generating a formatted `.txt` file of a playlist with BPM and Camelot key columns
+- `api.py` / `display.py` / `matching.py` — tracks missing from ReccoBeats are no longer silently dropped; they are included with sentinel values (`bpm=-1`, `camelot_key="X"`), displayed as `???` in exports, and filtered out before ranking in `recommend`
 
 **Working commands:**
 ```
@@ -37,8 +38,8 @@ python3 main.py export --playlist "chill hosting"
 ### Robustness
 - Playlist search could be smarter about exact vs. partial matches — auto-select when there's an exact name match even if multiple results are returned
 
-**Investigate: missing tracks in export**
-Observed ~30 tracks dropped from a 126-track playlist. Two likely causes to confirm: (1) ReccoBeats doesn't have full Spotify catalog coverage — tracks missing from ReccoBeats are silently dropped in `_merge_track_data`; (2) ISRC deduplication (designed for `recommend`) may be incorrectly filtering tracks in the export flow. Tracks without ReccoBeats data should still appear in the export with BPM/key marked as unknown.
+**Investigate: ISRC deduplication may still drop tracks from export**
+The ReccoBeats coverage gap is now handled. A second potential cause remains: ISRC deduplication (designed for `recommend`) may incorrectly filter tracks in the export flow. Worth confirming whether tracks are still dropped after the sentinel fix.
 
 ---
 

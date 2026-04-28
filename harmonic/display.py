@@ -38,7 +38,7 @@ def generate_results_table(results, title):
     console.print(table)
 
 # display a numbered list of options for the user to select from to disambiguate (e.g. playlists, artists, etc.)
-def show_option_picker(options):
+def show_option_picker(options, query=None):
     console = Console()
 
     # if there is only one option, just select it and move on instead of asking the user to confirm
@@ -46,6 +46,14 @@ def show_option_picker(options):
         console.print()
         console.print(f"Only one option found, selecting \"{options[0]}\" automatically.")
         return 0
+    
+    # if there's an exact match, select that automatically as well
+    if query:
+        for idx, option in enumerate(options):
+            if option.strip().lower() == query.strip().lower():
+                console.print()
+                console.print(f"Exact match found for \"{query}\", selecting \"{option}\" automatically.")
+                return idx
 
     # otherwise we want to ask them to confirm which one they meant
     for idx, option in enumerate(options, start=1):

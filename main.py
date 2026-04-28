@@ -7,8 +7,6 @@ import typer
 
 app = typer.Typer()
 
-# TODO: it would be nice to cleanup/improve the console statuses, maybe showing a step is done and adding a line below for the subsequent step?
-
 # using Typer to work with CLI commands more easily
 @app.command()
 def recommend(
@@ -40,11 +38,13 @@ def recommend(
             typer.echo(f"No artists found for name: {artist}")
             raise typer.Exit()
         
+        typer.echo("✓ Authenticated to Spotify")
+        
         artist_options = [a['name'] for a in artists]
         
-        selection = show_option_picker(artist_options)
+        typer.echo()
+        selection = show_option_picker(artist_options, artist)
         selected_artist = artists[selection]
-
         typer.echo()
 
         with console.status("Fetching tracks..."):
@@ -55,14 +55,16 @@ def recommend(
             typer.echo(f"No tracks found for artist: {artist}")
             raise typer.Exit()
         
-        typer.echo()
+        typer.echo("✓ Track data acquired")
 
         with console.status("Analyzing tracks..."):
             details = get_track_details(tracks)
+        
+        typer.echo("✓ Tracks analyzed")
 
         with console.status("Ranking tracks..."):
             ranked = rank_tracks(details, bpm, key)
-    
+        
     elif playlist:
         with console.status("Initializing..."):
             sp = get_spotify_client()
@@ -72,15 +74,21 @@ def recommend(
                 typer.echo(f"No playlists found for name: {playlist}")
                 raise typer.Exit()
         
-        options = [p['name'] for p in playlists]
-        selection = show_option_picker(options)
+        typer.echo("✓ Authenticated to Spotify")
 
+        options = [p['name'] for p in playlists]
+        typer.echo()
+        selection = show_option_picker(options, playlist)
         selected_playlist = playlists[selection]
         typer.echo()
 
-        with console.status("Analyzing tracks..."):
+        with console.status("Fetching tracks..."):
             tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
+        typer.echo("✓ Track data acquired")
+
+        with console.status("Analyzing tracks..."):
             details = get_track_details(tracks)
+        typer.echo("✓ Tracks analyzed")
 
         with console.status("Ranking tracks..."):
             ranked = rank_tracks(details, bpm, key)
@@ -106,21 +114,25 @@ def export(playlist: str = typer.Option(None, help="Export setlist from a specif
             typer.echo()
             typer.echo(f"No playlists found for name: {playlist}")
             raise typer.Exit()
-    
-    options = [p['name'] for p in playlists]
-    selection = show_option_picker(options)
+    typer.echo("✓ Authenticated to Spotify")
 
+    options = [p['name'] for p in playlists]
+    typer.echo()
+    selection = show_option_picker(options, playlist)
     selected_playlist = playlists[selection]
     typer.echo()
 
-    with console.status("Analyzing tracks..."):
+    with console.status("Fetching tracks..."):
         tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
+    typer.echo("✓ Track data acquired")
+
+    with console.status("Analyzing tracks..."):
         details = get_track_details(tracks)
+    typer.echo("✓ Tracks analyzed")
 
     with console.status("Exporting setlist..."):
         filename = write_setlist_to_file(details, selected_playlist['name'])
-        typer.echo()
-        typer.echo(f"Setlist exported to {filename}")
+    typer.echo(f"✓ Setlist exported to {filename}")
 
 @app.callback()
 def disclaimer():

@@ -66,8 +66,8 @@ def _merge_track_data(tracks, audio_features):
         track_id = track["track_id"]
 
         if track_id in audio_features:
-            # avoid adding tracks we've already seen
-            if audio_features[track_id]["isrc"] in isrc_set:
+            # avoid adding tracks we've already seen, or that are missing ISRC for now
+            if not audio_features[track_id].get("isrc") or audio_features[track_id]["isrc"] in isrc_set:
                 continue
 
             isrc_set.add(audio_features[track_id]["isrc"])

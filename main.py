@@ -7,6 +7,8 @@ import typer
 
 app = typer.Typer()
 
+# TODO: it would be nice to cleanup/improve the console statuses, maybe showing a step is done and adding a line below for the subsequent step?
+
 # using Typer to work with CLI commands more easily
 @app.command()
 def recommend(

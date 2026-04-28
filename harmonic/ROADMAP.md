@@ -14,6 +14,11 @@
 - `display.py` — `show_option_picker` refactored as a generic disambiguation picker (playlists, artists, tracks); auto-selects and notifies user when only one result is found
 - `main.py` — `export` command for generating a formatted `.txt` file of a playlist with BPM and Camelot key columns
 - `api.py` / `display.py` / `matching.py` — tracks missing from ReccoBeats are no longer silently dropped; they are included with sentinel values (`bpm=-1`, `camelot_key="X"`), displayed as `???` in exports, and filtered out before ranking in `recommend`
+- `api.py` — artist disambiguation via `get_artists()` returning top 3 Spotify results; `get_all_artist_tracks()` refactored to accept `artist_id` directly instead of re-running a search
+- `display.py` — `show_option_picker` supports optional `query` parameter for case-insensitive exact match auto-selection, covering both artist and playlist flows
+- `api.py` — ISRC key access hardened with `.get()` to avoid `KeyError` on tracks without an ISRC
+- `display.py` — results table capped at 20 rows
+- `main.py` — step-by-step progress feedback with ✓ checkmarks after each completed stage across all three commands
 
 **Working commands:**
 ```
@@ -26,7 +31,6 @@ python3 main.py export --playlist "chill hosting"
 ## In Progress / TODOs
 
 ### `recommend` command — remaining flows
-- disambiguating between artists with common names
 - `--track "Song Name"` input: disambiguate track, auto-fetch BPM and key, then run recommendation flow (works with both `--artist` and `--playlist`)
 
 ### Display
@@ -34,9 +38,6 @@ python3 main.py export --playlist "chill hosting"
 - Consider capping table output (50+ rows is unwieldy)
 - Listing how many tracks got analyzed could be cool
 - More graceful error handling
-
-### Robustness
-- Playlist search could be smarter about exact vs. partial matches — auto-select when there's an exact name match even if multiple results are returned
 
 **Investigate: ISRC deduplication may still drop tracks from export**
 The ReccoBeats coverage gap is now handled. A second potential cause remains: ISRC deduplication (designed for `recommend`) may incorrectly filter tracks in the export flow. Worth confirming whether tracks are still dropped after the sentinel fix.

@@ -26,14 +26,7 @@ python3 main.py recommend --bpm 123 --key 10B --playlist "moshi"
 Example:
 ![results for searching within playlist](./screenshots/playlist_demo_041726.png)
 
-Searches your Spotify library for matching playlists, lets you pick one, then finds compatible tracks within it.
-
-### Export a playlist to a text file
-```
-python3 main.py export --playlist "moshi moshi"
-```
-
-Fetches all tracks from a playlist with their BPM and Camelot key and writes them to a local `.txt` file. Useful for workshopping set order outside of Spotify.
+Both flows support disambiguation — if multiple artists or playlists match your input, you'll be shown up to 3 options to choose from. Exact name matches are selected automatically.
 
 Results are color-coded by compatibility tier:
 - **Green** — Perfect Match (±5 BPM, ±2 Camelot)
@@ -41,6 +34,13 @@ Results are color-coded by compatibility tier:
 - **Orange** — Ok (±15 BPM, ±4 Camelot)
 
 Results are sorted by tier first, then by proximity to your target values within each tier.
+
+### Export a playlist to a text file
+```
+python3 main.py export --playlist "moshi moshi"
+```
+
+Fetches all tracks from a playlist with their BPM and Camelot key and writes them to a local `.txt` file. Useful for workshopping set order outside of Spotify. Tracks missing audio data are included with `???` for BPM and key.
 
 ---
 

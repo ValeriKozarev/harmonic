@@ -1,5 +1,5 @@
 from harmonic.auth import get_spotify_client
-from harmonic.api import get_all_artist_tracks, get_track_details, get_matching_playlists, get_all_playlist_tracks
+from harmonic.api import get_artists, get_all_artist_tracks, get_track_details, get_matching_playlists, get_all_playlist_tracks
 from harmonic.matching import rank_tracks
 from harmonic.display import generate_results_table, show_option_picker, write_setlist_to_file
 from rich.console import Console
@@ -31,15 +31,34 @@ def recommend(
     if artist:
         with console.status("Initializing..."):
             sp = get_spotify_client()
-            tracks = get_all_artist_tracks(sp, artist)
+            artists = get_artists(sp, artist)
 
-            if not tracks:
-                typer.echo()
-                typer.echo(f"No tracks found for artist: {artist}")
-                raise typer.Exit()
+        if not artists:
+            typer.echo()
+            typer.echo(f"No artists found for name: {artist}")
+            raise typer.Exit()
+        
+        artist_options = [a['name'] for a in artists]
+        
+        selection = show_option_picker(artist_options)
+        selected_artist = artists[selection]
+
+        typer.echo()
+
+        with console.status("Fetching tracks..."):
+            tracks = get_all_artist_tracks(sp, selected_artist["id"])
+
+        if not tracks:
+            typer.echo()
+            typer.echo(f"No tracks found for artist: {artist}")
+            raise typer.Exit()
+        
+        typer.echo()
 
         with console.status("Analyzing tracks..."):
             details = get_track_details(tracks)
+
+        with console.status("Ranking tracks..."):
             ranked = rank_tracks(details, bpm, key)
     
     elif playlist:
@@ -60,6 +79,8 @@ def recommend(
         with console.status("Analyzing tracks..."):
             tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
             details = get_track_details(tracks)
+
+        with console.status("Ranking tracks..."):
             ranked = rank_tracks(details, bpm, key)
 
 
@@ -90,9 +111,11 @@ def export(playlist: str = typer.Option(None, help="Export setlist from a specif
     selected_playlist = playlists[selection]
     typer.echo()
 
-    with console.status("Exporting setlist..."):
+    with console.status("Analyzing tracks..."):
         tracks = get_all_playlist_tracks(sp, selected_playlist["id"])
         details = get_track_details(tracks)
+
+    with console.status("Exporting setlist..."):
         filename = write_setlist_to_file(details, selected_playlist['name'])
         typer.echo()
         typer.echo(f"Setlist exported to {filename}")

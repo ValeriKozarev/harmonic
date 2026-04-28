@@ -5,7 +5,7 @@ import requests
 
 # search the Spotify API for a track, return a simplified list of tracks with only the data we need
 def search_tracks(spotify_client, query):
-    track_results = spotify_client.search(q=query, type="track")
+    track_results = spotify_client.search(q=query, type="track", limit=3)
     tracks_simplified = [
         {
             "track_id": track["id"], 
@@ -102,13 +102,14 @@ def get_track_details(tracks):
 
     return _merge_track_data(tracks, audio_features)
 
-# get all of an artist's tracks from Spotify
-def get_all_artist_tracks(spotify_client, artist_name):
-    # TODO: do we need to make this more robust for artist naming?
+# search for an artist and return list of potential matches
+def get_artists(spotify_client, artist_name):
+    results = spotify_client.search(q=artist_name, type="artist", limit=3)
+    return results["artists"]["items"]
 
-    # due to how the Spotify APIs are structured, we need to first get the Artist ID, then the list of Album IDs, and then the track IDs for each album
-    artist_results = spotify_client.search(q=artist_name, type="artist")
-    artist_id = artist_results["artists"]["items"][0]["id"]
+# get all of an artist's tracks from Spotify
+def get_all_artist_tracks(spotify_client, artist_id):
+    # due to how the Spotify APIs are structured, we need the list of Album IDs for the artist first, and then the track IDs for each album
 
     artist_albums_results = spotify_client.artist_albums(artist_id, include_groups="single,album", limit=5)
     album_ids = [album["id"] for album in artist_albums_results["items"]]
